@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Send Test Email</title>
+  <link rel="stylesheet" href="../static/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #0077cc;
+      --primary-hover: #005fa3;
+      --background-color: #eef2f7;
+      --card-background: #ffffff;
+      --border-radius: 12px;
+      --transition-speed: 0.3s;
+      --input-border: #ccc;
+      --input-focus-border: #0077cc;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --hint-color: #666;
+      --hint-background: #f9f9f9;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: var(--background-color);
+      color: #2c3e50;
+      transition: background var(--transition-speed);
+    }
+    .container {
+      background: var(--card-background);
+      padding: 40px;
+      border-radius: var(--border-radius);
+      max-width: 1000px;
+      margin: 50px auto;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 40px;
+      transition: box-shadow var(--transition-speed);
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 16px;
+      transition: color var(--transition-speed);
+    }
+    nav a:hover {
+      color: var(--primary-hover);
+    }
+    h1 {
+      font-size: 36px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 26px;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 25px;
+    }
+    form {
+      display: grid;
+      gap: 20px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border var(--transition-speed), box-shadow var(--transition-speed);
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 5px rgba(0, 119, 204, 0.3);
+      outline: none;
+    }
+    button {
+      background-color: var(--primary-color);
+      color: #fff;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color var(--transition-speed), transform var(--transition-speed);
+    }
+    button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+    .logs {
+      background: #111;
+      color: #0f0;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    .form-section {
+      display: grid;
+      gap: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Send Test Email</h1>
+
+    <nav>
+      <a href="/">Home</a>
+      <a href="/campaigns">Manage Campaigns</a>
+    </nav>
+
+    <section class="form-section">
+      <h2>Test Email Form</h2>
+      <form id="testEmailForm">
+        <select id="serviceAccountsDropdown" name="service_account_id" required>
+          <option value="">Select Service Account</option>
+        </select>
+
+        <select id="usersDropdown" name="user_id" required>
+          <option value="">Select User Email</option>
+        </select>
+
+        <label for="raw_headers">Raw Headers (Full Block)</label>
+        <textarea id="raw_headers" name="raw_headers" rows="10" placeholder="From: user@example.com
+To: receiver@example.com
+Subject: Test Email
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+X-Custom-Header: CustomValue"></textarea>
+
+        <label for="body_html">Body HTML</label>
+        <textarea name="body_html" rows="8" placeholder="Welcome [email], click <a href='https://yourdomain.com/[RANDOM:10]'>here</a>" required></textarea>
+
+        <button type="submit">Send Test Email</button>
+      </form>
+    </section>
+
+    <section class="form-section">
+      <h2>Logs</h2>
+      <div id="logs" class="logs"></div>
+    </section>
+  </div>
+
+  <script src="../static/test_email.js"></script>
+</body>
+</html>

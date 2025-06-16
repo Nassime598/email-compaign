@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | Gmail Campaign Manager</title>
+  <link rel="stylesheet" href="../static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #0077cc;
+      --primary-hover: #005fa3;
+      --background-color: #eef2f7;
+      --card-background: #ffffff;
+      --border-radius: 12px;
+      --transition-speed: 0.3s;
+      --input-border: #ccc;
+      --input-focus-border: #0077cc;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --logs-background: #0f0f0f;
+      --logs-color: #00ff00;
+      --table-header-background: #0077cc;
+      --table-header-color: #fff;
+      --table-row-hover: #f1f1f1;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: var(--background-color);
+      color: #2c3e50;
+      transition: background var(--transition-speed);
+    }
+
+    .container {
+      background: var(--card-background);
+      padding: 40px;
+      border-radius: var(--border-radius);
+      max-width: 1200px;
+      margin: 50px auto;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 40px;
+      transition: box-shadow var(--transition-speed);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 16px;
+      transition: color var(--transition-speed);
+    }
+
+    nav a:hover {
+      color: var(--primary-hover);
+    }
+
+    h1 {
+      font-size: 36px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 26px;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 25px;
+    }
+
+    h3 {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .form-section {
+      display: grid;
+      gap: 20px;
+    }
+
+    select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border var(--transition-speed), box-shadow var(--transition-speed);
+    }
+
+    select:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 5px rgba(0, 119, 204, 0.3);
+      outline: none;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: #fff;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color var(--transition-speed), transform var(--transition-speed);
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .logs {
+      background: var(--logs-background);
+      color: var(--logs-color);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #222;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th {
+      background-color: var(--table-header-background);
+      color: var(--table-header-color);
+      text-align: left;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    td {
+      padding: 12px;
+      border-top: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background-color: var(--table-row-hover);
+    }
+
+    .dashboard-overview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .dashboard-card {
+      flex: 1 1 300px;
+      background: var(--card-background);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 20px;
+    }
+
+    canvas {
+      background: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gmail Campaign Manager Dashboard</h1>
+
+    <nav>
+      <a href="/service_accounts">Manage Service Accounts</a>
+      <a href="/campaigns">Manage Campaigns</a>
+      <a href="/test_send">Test Send Email</a>
+    </nav>
+
+    <section class="form-section">
+      <h2>Campaign Controls</h2>
+      <select id="campaignSelect">
+        <option value="">Select Campaign to Start</option>
+      </select>
+      <div class="button-group">
+        <button onclick="startCampaign()">Start Campaign</button>
+        <button onclick="pauseCampaign()">Pause Campaign</button>
+        <button onclick="resumeCampaign()">Resume Campaign</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Live Logs</h2>
+      <div id="logs" class="logs"></div>
+    </section>
+
+    <section class="form-section">
+      <h2>Dashboard Overview</h2>
+      <div class="dashboard-overview">
+        <div class="dashboard-card">
+          <h3>Overall Success vs Failed</h3>
+          <canvas id="dashboardChart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="dashboard-card">
+          <h3>Campaigns Summary</h3>
+          <table id="campaignsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Sent</th>
+                <th>Failed</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Filled dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dashboard-card">
+          <h3>Service Accounts</h3>
+          <table id="serviceAccountsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Quota</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Filled dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../static/home.js"></script>
+  <script>
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+    const dashboardChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Success', 'Failed'],
+        datasets: [{
+          label: 'Delivery Status',
+          data: [300, 50],
+          backgroundColor: ['#28a745', '#dc3545'],
+          borderColor: ['#28a745', '#dc3545'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#2c3e50',
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#2c3e50',
+            titleColor: '#fff',
+            bodyColor: '#fff'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

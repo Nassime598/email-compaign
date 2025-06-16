@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Campaigns</title>
+  <link rel="stylesheet" href="../static/style.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #0077cc;
+      --primary-hover: #005fa3;
+      --background-color: #eef2f7;
+      --card-background: #ffffff;
+      --border-radius: 12px;
+      --transition-speed: 0.3s;
+      --input-border: #ccc;
+      --input-focus-border: #0077cc;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --hint-color: #666;
+      --hint-background: #f9f9f9;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: var(--background-color);
+      color: #2c3e50;
+      transition: background var(--transition-speed);
+    }
+
+    .container {
+      background: var(--card-background);
+      padding: 40px;
+      border-radius: var(--border-radius);
+      max-width: 1000px;
+      margin: 50px auto;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 40px;
+      transition: box-shadow var(--transition-speed);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 16px;
+      transition: color var(--transition-speed);
+    }
+
+    nav a:hover {
+      color: var(--primary-hover);
+    }
+
+    h1 {
+      font-size: 36px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 26px;
+      border-bottom: 3px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 25px;
+    }
+
+    h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    form {
+      display: grid;
+      gap: 20px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border var(--transition-speed), box-shadow var(--transition-speed);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 5px rgba(0, 119, 204, 0.3);
+      outline: none;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: #fff;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color var(--transition-speed), transform var(--transition-speed);
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .form-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hint {
+      background-color: var(--hint-background);
+      border-left: 4px solid var(--primary-color);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--hint-color);
+      margin-top: -10px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .tag-examples {
+      background: #f9fbfd;
+      border-left: 5px solid var(--primary-color);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      display: grid;
+      gap: 10px;
+    }
+
+    .tag-examples h4 {
+      font-size: 18px;
+      margin: 0 0 10px 0;
+    }
+
+    .tag-examples ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .form-section {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      form {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .form-group, textarea, .tag-examples, select, input, button {
+        grid-column: span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Manage Campaigns</h1>
+
+    <nav>
+      <a href="/">Home</a>
+      <a href="/service_accounts">Manage Service Accounts</a>
+    </nav>
+
+    <section class="form-section">
+      <h2>Create Campaign</h2>
+      <form id="createCampaignForm">
+        <select id="serviceAccountsDropdownForCampaign" name="service_account_id" required>
+          <option value="">Select Service Account</option>
+        </select>
+
+        <input type="text" name="name" placeholder="Campaign Name" required>
+
+       <div class="form-group">
+  <h3>Custom Headers</h3>
+  <label for="headers">Headers (Key: Value per line)</label>
+  <textarea id="headers" name="headers" rows="12" placeholder="Example:
+Subject: Welcome [email]! Your code is [RANDOM:6]
+From: Your Brand <noreply@yourdomain.com>
+To: [email]
+Date: [mail_date]
+Message-ID: <[RANDOM:20]@yourdomain.com>
+X-Campaign-ID: CAMPAIGN-[RANDOM:8]
+List-Unsubscribe: <mailto:unsubscribe@yourdomain.com>, <https://yourdomain.com/unsubscribe?email=[email]>
+X-Mailer: CustomMailer/1.0" required></textarea>
+  <div class="hint">
+    Add headers here, including Subject:<br/>
+    Format: <code>Header-Name: Header-Value</code> <br/>
+    Example:<br/>
+    <code>Subject: Welcome [email]! Your code is [RANDOM:6]</code><br/>
+    <code>From: Your Brand &lt;noreply@yourdomain.com&gt;</code><br/>
+    <code>To: [email]</code><br/>
+    <code>Date: [mail_date]</code><br/>
+    <code>Message-ID: &lt;[RANDOM:20]@yourdomain.com&gt;</code><br/>
+    <code>X-Campaign-ID: CAMPAIGN-[RANDOM:8]</code><br/>
+    <code>List-Unsubscribe: &lt;mailto:unsubscribe@yourdomain.com&gt;, &lt;https://yourdomain.com/unsubscribe?email=[email]&gt;</code><br/>
+    <code>X-Mailer: CustomMailer/1.0</code><br/>
+    Supported tags: <strong>[email]</strong>, <strong>[RANDOM:N]</strong>, <strong>[mail_date]</strong>.
+  </div>
+</div>
+
+<div class="form-group">
+  <h3>Body HTML</h3>
+  <textarea name="body_html" rows="12" placeholder="Example:
+<!DOCTYPE html>
+<html lang='en'>
+<head><meta charset='UTF-8'><title>Welcome</title></head>
+<body>
+  <h1>Welcome [email]!</h1>
+  <p>We are excited to have you join us. Your special promo code is <strong>[RANDOM:10]</strong>.</p>
+  <p>This message was sent to you on <em>[mail_date]</em>.</p>
+  <p>Click <a href='https://yourdomain.com/start?ref=[RANDOM:12]'>here</a> to get started.</p>
+  <p>If you wish to unsubscribe, please click <a href='https://yourdomain.com/unsubscribe?email=[email]'>here</a>.</p>
+</body>
+</html>" required></textarea>
+  <div class="hint">
+    You can use:<br/>
+    <strong>[email]</strong> → Recipient's email address<br/>
+    <strong>[RANDOM:N]</strong> → Random alphanumeric string of N characters<br/>
+    <strong>[mail_date]</strong> → Current date formatted<br/>
+    Example:<br/>
+    <code>Welcome [email]! Click &lt;a href='https://yourdomain.com/[RANDOM:10]'&gt;here&lt;/a&gt;</code>
+  </div>
+</div>
+
+
+        <div class="tag-examples">
+          <h4>Available Tags:</h4>
+          <ul>
+            <li><strong>[email]</strong> → Recipient's email address</li>
+            <li><strong>[RANDOM:N]</strong> → Random string of length N</li>
+            <li><strong>[mail_date]</strong> → Current date formatted</li>
+          </ul>
+        </div>
+
+        <select name="send_type" required>
+          <option value="html">HTML</option>
+          <option value="text">Text</option>
+        </select>
+
+        <input type="text" name="x_delay" placeholder="X-Delay (Optional)">
+        <input type="number" name="send_speed" placeholder="Emails per Second" required>
+        <input type="number" name="emails_per_user" placeholder="Emails per User" required>
+        <input type="text" name="test_email" placeholder="Test Email Address" required>
+        <input type="number" name="test_every" placeholder="Send Test After How Many Emails" required>
+        <input type="hidden" name="user_ids" id="userIdsInput">
+
+        <button type="submit">Create Campaign</button>
+      </form>
+    </section>
+
+    <section class="form-section">
+      <h2>Upload Recipients</h2>
+      <form id="uploadRecipientsForm" enctype="multipart/form-data">
+        <input type="number" name="campaign_id" placeholder="Campaign ID" required>
+        <input type="file" name="file" required>
+        <button type="submit">Upload Recipients</button>
+      </form>
+    </section>
+  </div>
+
+  <script src="../static/campaigns.js"></script>
+</body>
+</html>
