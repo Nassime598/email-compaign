@@ -10,18 +10,6 @@ def create_gmail_service(user_email, service_account_path):
     )
     return build('gmail', 'v1', credentials=credentials, cache_discovery=False)
 
-def send_email(service, raw_headers, body_html, boundary="boundary123"):
-    full_email = raw_headers.strip() + "\n\n"
-
-    mime_body = (
-        f"--{boundary}\n"
-        "Content-Type: text/html; charset=utf-8\n"
-        "Content-Transfer-Encoding: quoted-printable\n"
-        "\n"
-        f"{body_html}\n"
-        f"--{boundary}--"
-    )
-
-    full_message = full_email + mime_body
-    encoded_message = base64.urlsafe_b64encode(full_message.encode('utf-8')).decode('utf-8')
+def send_email(service, full_raw_message):
+    encoded_message = base64.urlsafe_b64encode(full_raw_message.encode('utf-8')).decode('utf-8')
     return service.users().messages().send(userId='me', body={'raw': encoded_message}).execute()

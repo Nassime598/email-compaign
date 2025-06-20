@@ -1,3 +1,4 @@
+import base64
 import os
 import json
 import threading
@@ -12,6 +13,7 @@ from worker import EmailWorker
 from admin import setup_admin
 from gmail_sender import create_gmail_service, send_email
 from gmail_sender_test import send_test_email
+from worker import replace_tags  # Ensure this import exists at top
 
 app = Flask(
     __name__,
@@ -269,28 +271,27 @@ def send_test_email_route():
 
     service = create_gmail_service(user.email, service_account.filename)
 
-    raw_headers = data.get('raw_headers')
-    if not raw_headers:
-        return jsonify({'error': 'Missing raw headers'}), 400
+    raw_headers = data.get('raw_headers', '')
+    full_body = data.get('full_body', '')
 
-    body_html = data.get('body_html')
+    # Replace tags
+    raw_headers = raw_headers.replace('[user-sender]', user.email)
+    raw_headers = replace_tags(raw_headers, user.email)
+    full_body = replace_tags(full_body, user.email)
+
+    full_message = raw_headers.strip() + "\n\n" + full_body
+    encoded_message = base64.urlsafe_b64encode(full_message.encode('utf-8')).decode('utf-8')
 
     try:
-        response = send_test_email(
-            service=service,
-            raw_headers=raw_headers,
-            body_html=body_html,
-            boundary="boundary123"
-        )
-
+        response = service.users().messages().send(userId='me', body={'raw': encoded_message}).execute()
         with open(log_file, 'a') as f:
             f.write(f"Sent test email to {user.email}: {response.get('id')}\n")
-
         return jsonify({'status': 'Email sent', 'message_id': response.get('id')})
     except Exception as e:
         with open(log_file, 'a') as f:
             f.write(f"Failed to send test email to {user.email}: {str(e)}\n")
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)

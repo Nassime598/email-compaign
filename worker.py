@@ -10,8 +10,8 @@ from models import Campaign, CampaignRecipient, CampaignUser, ServiceAccount, Us
 from gmail_sender import create_gmail_service, send_email
 
 DAILY_GMAIL_QUOTA_LIMIT = 2000
-QUOTA_SAFETY_MARGIN = 1950  # Don't push to 2000
-MAX_WORKERS = 200           # Controlled concurrency limit
+QUOTA_SAFETY_MARGIN = 1950
+MAX_WORKERS = 200
 
 def replace_tags(text, recipient_email):
     if not text:
@@ -58,12 +58,12 @@ class EmailWorker:
             self.service_cache[sender_email] = service
         return self.service_cache[sender_email]
 
-    def send_email_with_retry(self, service, raw_headers, body_html):
+    def send_email_with_retry(self, service, full_raw_message):
         max_retries = 5
         backoff = 1
         for attempt in range(max_retries):
             try:
-                return send_email(service, raw_headers, body_html, boundary="boundary123")
+                return send_email(service, full_raw_message)
             except googleapiclient.errors.HttpError as e:
                 if e.resp.status in [429, 500, 502, 503, 504]:
                     time.sleep(backoff)
@@ -84,17 +84,16 @@ class EmailWorker:
 
         dynamic_headers = []
         for header in headers:
-            dynamic_headers.append(f"{header['name']}: {replace_tags(header['value'], recipient_email)}")
+            value = header['value'].replace('[user-sender]', sender_email)
+            value = replace_tags(value, recipient_email)
+            dynamic_headers.append(f"{header['name']}: {value}")
 
-        body_html = replace_tags(campaign.body_html, recipient_email)
-        raw_headers = "\n".join(dynamic_headers)
+        raw_headers_str = "\n".join(dynamic_headers)
+        full_body = replace_tags(campaign.body_html, recipient_email)
+        full_raw_message = raw_headers_str.strip() + "\n\n" + full_body
 
         try:
-            response = self.send_email_with_retry(
-                service,
-                raw_headers,
-                body_html
-            )
+            response = self.send_email_with_retry(service, full_raw_message)
             self.log_email(sender_email, recipient_email, "SUCCESS", response.get('id'))
             self.user_send_count[sender_email] += 1
             self.success_count += 1
@@ -127,7 +126,6 @@ class EmailWorker:
             campaign_users = CampaignUser.query.filter_by(campaign_id=self.campaign_id).all()
 
             senders = [(u.email, ServiceAccount.query.get(u.service_account_id).filename) for u in campaign_users]
-
             sender_cycle = iter(senders)
 
             self.executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
